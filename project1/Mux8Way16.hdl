@@ -1,0 +1,55 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/01/Mux8Way16.hdl
+
+/**
+ * 8-way 16-bit multiplexor:
+ * out = a if sel == 000
+ *       b if sel == 001
+ *       etc.
+ *       h if sel == 111
+ */
+
+CHIP Mux8Way16 {
+    IN a[16], b[16], c[16], d[16],
+       e[16], f[16], g[16], h[16],
+       sel[3];
+    OUT out[16];
+
+    PARTS:
+    Not(in=sel[0], out=notsel0);
+    Not(in=sel[1], out=notsel1);
+    Not(in=sel[2], out=notsel2);
+
+    And(a=sel[0], b=sel[1], out=s1s0);
+    And(a=sel[0], b=notsel1, out=n1s0);
+    And(a=notsel0, b=sel[1], out=s1n0);
+    And(a=notsel0, b=notsel1, out=n1n0);
+
+    And(b=sel[2],  a=s1s0, out=s2s1s0);
+    And(b=notsel2, a=s1s0, out=n2s1s0);
+    And(b=sel[2],  a=n1s0, out=s2n1s0);
+    And(b=notsel2, a=n1s0, out=n2n1s0);
+    And(b=sel[2],  a=s1n0, out=s2s1n0);
+    And(b=notsel2, a=s1n0, out=n2s1n0);
+    And(b=sel[2],  a=n1n0, out=s2n1n0);
+    And(b=notsel2, a=n1n0, out=n2n1n0);
+
+    Imp16(a=n2n1n0, b=a, out=outA);
+    Imp16(a=n2n1s0, b=b, out=outB);
+    Imp16(a=n2s1n0, b=c, out=outC);
+    Imp16(a=n2s1s0, b=d, out=outD);
+    Imp16(a=s2n1n0, b=e, out=outE);
+    Imp16(a=s2n1s0, b=f, out=outF);
+    Imp16(a=s2s1n0, b=g, out=outG);
+    Imp16(a=s2s1s0, b=h, out=outH);
+
+    And16(a=outA, b=outB, out=out1);
+    And16(a=out1, b=outC, out=out2);
+    And16(a=out2, b=outD, out=out3);
+    And16(a=out3, b=outE, out=out4);
+    And16(a=out4, b=outF, out=out5);
+    And16(a=out5, b=outG, out=out6);
+    And16(a=out6, b=outH, out=out);
+}
