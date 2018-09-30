@@ -4,5 +4,5 @@ CHIP And3 {
 
     PARTS:
     And(a=a, b=b, out=ab);
-    And(a=ab, c=c, out=out);
+    And(a=ab, b=c, out=out);
 }

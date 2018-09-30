@@ -1,5 +1,5 @@
 // This file is part of www.nand2tetris.org
-// and the book "The Elements of Computing Systems"
+// and the book The Elements of Computing Systems
 // by Nisan and Schocken, MIT Press.
 // File name: projects/05/CPU.hdl
 
@@ -39,5 +39,68 @@ CHIP CPU {
         pc[15];          // address of next instruction
 
     PARTS:
-    // Put your code here:
+      And(a=instruction[15], b=instruction[3], out=writeM);
+      Mux16(a=instruction, b=outALU, sel=instruction[15], out=outMux1);
+      Not(in=instruction[15], out=storeA);
+      Or(a=instruction[5], b=storeA, out=Aload);
+      ARegister(in=outMux1, load=Aload, out=outA, out[0..14]=addressM, out=pcA);
+      Mux16(a=outA, b=inM, sel=instruction[12], out=outMux2);
+
+      And(a=instruction[2], b=instruction[2], out=j1);
+      Not(in=j1, out=notj1);
+      And(a=instruction[1], b=instruction[1], out=j2);
+      Not(in=j2, out=notj2);
+      And(a=instruction[0], b=instruction[0], out=j3);
+      Not(in=j3, out=notj3);
+
+      And3(a=notj1, b=notj2, c=notj3, out=NoJump);
+      And3(a=notj1, b=notj2, c=j3, out=JGT);
+      And3(a=notj1, b=j2, c=notj3, out=JEQ);
+      And3(a=notj1, b=j2, c=j3, out=JGE);
+      And3(a=j1, b=notj2, c=notj3, out=JLT);
+      And3(a=j1, b=notj2, c=j3, out=JNE);
+      And3(a=j1, b=j2, c=notj3, out=JLE);
+      And3(a=j1, b=j2, c=j3, out=JMP);
+
+      Not(in=ng, out=notNg);
+      Not(in=zr, out=notZr);
+      And(a=notNg, b=notZr, out=pg);
+      Or(a=pg, b=zr, out=pgZr);
+      Or(a=ng, b=zr, out=ngZr);
+
+      Not(in=NoJump, out=NotNoJump);
+
+      And(a=JGT, b=pg, out=Jump1);
+      And(a=JEQ, b=zr, out=Jump2);
+      And(a=JGE, b=pgZr, out=Jump3);
+      And(a=JLT, b=ng, out=Jump4);
+      And(a=JNE, b=notZr, out=Jump5);
+      And(a=JLE, b=ngZr, out=Jump6);
+
+      Or8Way(in[0]=false,
+      in[1]=Jump1,
+      in[2]=Jump2,
+      in[3]=Jump3,
+      in[4]=Jump4,
+      in[5]=Jump5,
+      in[6]=Jump6,
+      in[7]=JMP, out=Jump);
+
+      And(a=Jump, b=NotNoJump, out=DoJump);
+
+      And(a=DoJump, b=instruction[15], out=loadJump);
+      Not(in=instruction[15], out=OrderA);
+      Not(in=loadJump, out=NotloadJump);
+      Or(a=OrderA, b=NotloadJump, out=inc);
+      PC(in=pcA, reset=reset, load=loadJump, inc=inc, out[0..14]=pc);
+      ALU(x=outD, y=outMux2, zx=instruction[11], nx=instruction[10],
+          zy=instruction[9], ny=instruction[8], f=instruction[7], no=instruction[6],
+          zr=zr, ng=ng,
+          out=outALU,
+          out[15]=outALU15,
+          out=outM);
+      Not(in=storeA, out=notStoreA);
+      And(a=notStoreA, b=instruction[4], out=storeD);
+      DRegister(in=outALU, load=storeD, out=outD);
+
 }

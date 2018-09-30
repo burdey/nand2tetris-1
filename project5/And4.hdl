@@ -1,4 +1,4 @@
-CHIP And3 {
+CHIP And4 {
     IN a, b, c, d;
     OUT out;
 
