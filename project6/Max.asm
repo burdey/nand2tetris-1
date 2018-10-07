@@ -25,4 +25,4 @@
 (INFINITE_LOOP)
    @INFINITE_LOOP
    0;JMP            // infinite loop
-   D=M;JUMP
+   D=M;JMP
