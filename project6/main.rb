@@ -4,7 +4,10 @@ require './code.rb'
 require './symbol_table.rb'
 
 class Main
-  def initialize(filename)
+  def initialize
+    filename = ARGV[0]
+    result_name = ARGV[1]
+
     @symbol_table = SymbolTable.new
     createSymbolTable(filename)
 
@@ -36,7 +39,7 @@ class Main
       parser.advance
     end
 
-    File.open("result.hack", "w") do |f|
+    File.open(result_name, "w") do |f|
       f.puts(result)
     end
   end
@@ -70,5 +73,4 @@ class Main
   end
 end
 
-# Main.new("pong/Pong.asm")
-Main.new("eq_test.asm")
+Main.new

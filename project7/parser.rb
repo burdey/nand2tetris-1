@@ -9,7 +9,7 @@ C_RETURN = 8
 C_CALL = 9
 
 class Parser
-  attr_accessor :file_array, :file_length, :current_command
+  attr_reader :file_array, :file_length, :current_command
 
   def initialize(filename)
     @file_array = []
@@ -25,7 +25,6 @@ class Parser
         @file_array << line
       end
     end
-    p @file_array
     @file_length = @file_array.length
   end
 
@@ -81,11 +80,4 @@ class Parser
     line = reg.pre_match if reg
     line.strip
   end
-end
-
-parser = Parser.new("test.vm")
-
-parser.file_length.times do
-  parser.advance
-  p "#{parser.current_command}, #{parser.command_type(parser.current_command)}"
 end
