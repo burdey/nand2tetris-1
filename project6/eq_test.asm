@@ -1,0 +1,46 @@
+@256
+D=A
+@SP
+M=D
+
+@21
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+
+@21
+D=A
+@SP
+A=M
+M=D
+@SP
+M=M+1
+
+  @SP
+  M=M-1
+  A=M
+  D=M
+  @SP
+  M=M-1
+  A=M
+  D=M-D
+  @TRUE
+  D;JEQ
+(TRUE)
+  @0
+  D=A-1
+  @SP
+  A=
+  M=D
+  @SP
+  M=M+1
+  @NEXT
+  D;JMP
+  @0
+  M=A
+  @SP
+  M=M+1
+(NEXT)
