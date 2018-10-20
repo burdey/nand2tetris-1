@@ -37,14 +37,9 @@ def push_segment(segment, index)
 end
 
 class CodeWriter
-  def initialize
+  def initialize(filename)
+    @filename = filename
     @label_counter = -1
-  end
-
-  def set_file_name
-  end
-
-  def write_arithmetic(command)
   end
 
   def write_push_pop(command, segment, index)
@@ -73,6 +68,24 @@ class CodeWriter
           // R13にtemp+indexの指す位置が格納された。
           @R13
           A=M
+          D=M
+        EOF
+      elsif segment == "pointer"
+        result = <<-EOF
+          @R3
+          D=A
+          @#{index}
+          D=D+A
+          @R13
+          M=D
+          // R13にtemp+indexの指す位置が格納された。
+          @R13
+          A=M
+          D=M
+        EOF
+      elsif segment == "static"
+        result = <<-EOF
+          @#{@filename}.#{index}
           D=M
         EOF
       end
@@ -109,6 +122,32 @@ class CodeWriter
           D=M
           @R13
           A=M
+          M=D
+        EOF
+      elsif segment == "pointer"
+        <<-EOF
+          @R3
+          D=A
+          @#{index}
+          D=D+A
+          @R13
+          M=D
+          // ↑R13に R3+index を保存
+          @SP
+          M=M-1
+          A=M
+          D=M
+          @R13
+          A=M
+          M=D
+        EOF
+      elsif segment == "static"
+        <<-EOF
+          @SP
+          M=M-1
+          A=M
+          D=M
+          @#{@filename}.#{index}
           M=D
         EOF
       end

@@ -6,9 +6,11 @@ class Main
     filename = ARGV[0]
     result_name = ARGV[1]
     @parser = Parser.new(filename)
-    @code_writer = CodeWriter.new
+    @code_writer = CodeWriter.new(filename)
     result = ""
+
     p @parser.file_length
+
     @parser.file_length.times do
       @parser.advance
       command = @parser.command_type(@parser.current_command)
