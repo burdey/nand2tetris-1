@@ -13,7 +13,7 @@ class Main
       @parser.advance
       command = @parser.command_type(@parser.current_command)
       case command
-      when C_PUSH
+      when C_PUSH, C_POP
         p @code_writer.write_push_pop(command, @parser.arg1, @parser.arg2)
         result += @code_writer.write_push_pop(command, @parser.arg1, @parser.arg2)
       when C_ARITHMETIC

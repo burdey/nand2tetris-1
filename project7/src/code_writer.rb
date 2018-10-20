@@ -1,3 +1,41 @@
+# DRYとか知らんがなのスタイルだが
+# 流石に混乱しそうなのは分けた
+def pop_segment(segment, index)
+  <<-EOF
+    // ↓R13に #{segment}+index を保存
+    @#{segment}
+    D=M
+    @#{index}
+    D=D+A
+    @R13
+    M=D
+    // ↑R13に #{segment}+index を保存
+    // ↓R13の位置にスタックから値を格納
+    @SP
+    M=M-1
+    A=M
+    D=M
+    @R13
+    A=M
+    M=D
+  EOF
+end
+
+def push_segment(segment, index)
+  <<-EOF
+  @#{segment}
+  D=M
+  @#{index}
+  D=D+A
+  @R13
+  M=D
+  // R13にsegment+indexの指す位置が格納された。
+  @R13
+  A=M
+  D=M
+ EOF
+end
+
 class CodeWriter
   def initialize
     @label_counter = -1
@@ -10,18 +48,68 @@ class CodeWriter
   end
 
   def write_push_pop(command, segment, index)
-    case command
-    when C_PUSH
-      case segment
-      when "constant"
-        <<-EOF
+    if command == C_PUSH
+      if segment == "constant"
+        result = <<-EOF
           @#{index}
           D=A
+        EOF
+      elsif segment == "local"
+        result = push_segment("LCL", index)
+      elsif segment == "argument"
+        result = push_segment("ARG", index)
+      elsif segment == "this"
+        result = push_segment("THIS", index)
+      elsif segment == "that"
+        result = push_segment("THAT", index)
+      elsif segment == "temp"
+        result = <<-EOF
+          @R5
+          D=A
+          @#{index}
+          D=D+A
+          @R13
+          M=D
+          // R13にtemp+indexの指す位置が格納された。
+          @R13
+          A=M
+          D=M
+        EOF
+      end
+    # スタックポインタを増やす
+    result +=
+      <<-EOF
+        @SP
+        A=M
+        M=D
+        @SP
+        M=M+1
+      EOF
+    elsif command == C_POP
+      if segment == "local"
+        pop_segment("LCL", index)
+      elsif segment == "argument"
+        pop_segment("ARG", index)
+      elsif segment == "this"
+        pop_segment("THIS", index)
+      elsif segment == "that"
+        pop_segment("THAT", index)
+      elsif segment == "temp"
+        <<-EOF
+          @R5
+          D=A
+          @#{index}
+          D=D+A
+          @R13
+          M=D
+          // ↑R13に R5+index を保存
           @SP
+          M=M-1
+          A=M
+          D=M
+          @R13
           A=M
           M=D
-          @SP
-          M=M+1
         EOF
       end
     end
