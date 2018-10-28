@@ -27,11 +27,7 @@ def push_segment(segment, index)
   D=M
   @#{index}
   D=D+A
-  @R13
-  M=D
-  // R13にsegment+indexの指す位置が格納された。
-  @R13
-  A=M
+  A=D
   D=M
  EOF
 end
@@ -64,11 +60,7 @@ class CodeWriter
           D=A
           @#{index}
           D=D+A
-          @R13
-          M=D
-          // R13にtemp+indexの指す位置が格納された。
-          @R13
-          A=M
+          A=D
           D=M
         EOF
       elsif segment == "pointer"
@@ -77,11 +69,7 @@ class CodeWriter
           D=A
           @#{index}
           D=D+A
-          @R13
-          M=D
-          // R13にtemp+indexの指す位置が格納された。
-          @R13
-          A=M
+          A=D
           D=M
         EOF
       elsif segment == "static"
@@ -155,26 +143,26 @@ class CodeWriter
     end
   end
 
-  def write_label(label)
+  def write_label(function_name, label)
     <<-EOF
-      (#{label})
+      @#{function_name}$#{label}
     EOF
   end
 
-  def write_goto(label)
+  def write_goto(function_name, label)
     <<-EOF
-      @#{label}
+      @#{function_name}$#{label}
       0; JMP
     EOF
   end
 
-  def write_if(label)
+  def write_if(function_name, label)
     <<-EOF
       @SP
       M=M-1
       A=M
       D=M
-      @#{label}
+      @#{function_name}$#{label}
       D; JNE
     EOF
   end
