@@ -35,7 +35,9 @@ end
 class CodeWriter
   def initialize(filename)
     @filename = filename
+    @function_name = ""
     @label_counter = -1
+    @func_call_counter = -1
   end
 
   def write_push_pop(command, segment, index)
@@ -143,34 +145,96 @@ class CodeWriter
     end
   end
 
-  def write_label(function_name, label)
+  def write_label(label)
     <<-EOF
-      @#{function_name}$#{label}
+      (#{@function_name}$#{label})
     EOF
   end
 
-  def write_goto(function_name, label)
+  def write_goto(label)
     <<-EOF
-      @#{function_name}$#{label}
+      @#{@function_name}$#{label}
       0; JMP
     EOF
   end
 
-  def write_if(function_name, label)
+  def write_if(label)
     <<-EOF
       @SP
       M=M-1
       A=M
       D=M
-      @#{function_name}$#{label}
+      @#{@function_name}$#{label}
       D; JNE
     EOF
   end
 
   def write_call(function_name, num_args)
+    @func_call_counter += 1
+    <<-EOF
+      // push return-address
+      @RET$#{function_name}$#{@func_call_counter}
+      D=A
+      @SP
+      A=M
+      M=D
+      @SP
+      M=M+1
+      // push LCL
+      @LCL
+      D=M
+      @SP
+      A=M
+      M=D
+      @SP
+      M=M+1
+      // push ARG
+      @ARG
+      D=M
+      @SP
+      A=M
+      M=D
+      @SP
+      M=M+1
+      // push THIS
+      @THIS
+      D=M
+      @SP
+      A=M
+      M=D
+      @SP
+      M=M+1
+      // push THAT
+      @THAT
+      D=M
+      @SP
+      A=M
+      M=D
+      @SP
+      M=M+1
+      // ARG=SP-n-5
+      @#{num_args}
+      D=A
+      @5
+      D=D+A
+      @SP
+      D=M-D
+      @ARG
+      M=D
+      // LCL=SP
+      @SP
+      D=M
+      @LCL
+      M=D
+      // goto f
+      @#{function_name}
+      0; JMP
+    (RET$#{function_name}$#{@func_call_counter})
+    EOF
   end
 
   def write_return
+    @function_name = ""
     <<-EOF
       // FRAME=LCL
       @LCL
@@ -246,6 +310,7 @@ class CodeWriter
   end
 
   def write_function(function_name, num_locals)
+    @function_name = function_name
     result = "(#{function_name})\n"
     num_locals.times do |i|
       result += push_segment("ARG", i)

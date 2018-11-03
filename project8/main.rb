@@ -7,7 +7,13 @@ class Main
     result_name = ARGV[1]
     @parser = Parser.new(filename)
     @code_writer = CodeWriter.new(filename)
-    result = ""
+    result = <<-EOF
+        @256
+        D=A
+        @SP
+        M=D
+      EOF
+      result += @code_writer.write_call("Sys.init", 0)
 
     @parser.file_length.times do
       @parser.advance
