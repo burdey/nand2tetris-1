@@ -41,7 +41,6 @@ class CodeWriter
   end
 
   def write_push_pop(command, segment, index)
-    p command
     if command == C_PUSH
       if segment == "constant"
         result = <<-EOF
@@ -173,7 +172,7 @@ class CodeWriter
     @func_call_counter += 1
     <<-EOF
       // push return-address
-      @RET$#{function_name}$#{@func_call_counter}
+      @RET$#{@filename}$#{function_name}$#{@func_call_counter}
       D=A
       @SP
       A=M
@@ -229,7 +228,7 @@ class CodeWriter
       // goto f
       @#{function_name}
       0; JMP
-    (RET$#{function_name}$#{@func_call_counter})
+    (RET$#{@filename}$#{function_name}$#{@func_call_counter})
     EOF
   end
 
@@ -310,6 +309,7 @@ class CodeWriter
 
   def write_function(function_name, num_locals)
     @function_name = function_name
+    p "(#{function_name})\n"
     result = "(#{function_name})\n"
     num_locals.times do
       result +=
