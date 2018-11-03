@@ -234,7 +234,6 @@ class CodeWriter
   end
 
   def write_return
-    @function_name = ""
     <<-EOF
       // FRAME=LCL
       @LCL
