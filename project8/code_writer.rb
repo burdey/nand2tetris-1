@@ -311,8 +311,17 @@ class CodeWriter
   def write_function(function_name, num_locals)
     @function_name = function_name
     result = "(#{function_name})\n"
-    num_locals.times do |i|
-      result += push_segment("ARG", i)
+    num_locals.times do
+      result +=
+          <<-EOF
+              @0
+              D=A
+              @SP
+              A=M
+              M=D
+              @SP
+              M=M+1
+          EOF
     end
     result
   end

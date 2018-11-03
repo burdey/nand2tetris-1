@@ -13,7 +13,7 @@ class Main
         @SP
         M=D
       EOF
-      result += @code_writer.write_call("Sys.init", 0)
+    result += @code_writer.write_call("Sys.init", 0)
 
     @parser.file_length.times do
       @parser.advance
